@@ -2,15 +2,13 @@
 
 class Physics
 {
-/*
 protected:
-	double x, y, h, w, vx, vy;
+	sf::Vector2f v{0, 0};
+	float angle = 0;
+	virtual void init_object() = 0;
+
 public:
-	virtual double get_velocity() = 0;
-	virtual void change_velocity(double dx, double dy) = 0;
-	virtual sf::FloatRect get_bounds() = 0;
-*/
-public:
-	virtual double get_velocity() = 0;
+	virtual float get_velocity() = 0;
+	virtual void set_velocity(float dr) = 0;
 };
 

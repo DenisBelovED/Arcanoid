@@ -15,6 +15,7 @@ public:
 		size_t scr_w(800), scr_h(640);
 		visual = new Visual(scr_w, scr_h);
 		model = new Model(scr_w, scr_h);
+		control = new Control();
 	}
 	~Engine()
 	{
@@ -24,11 +25,11 @@ public:
 	}
 	void game_loop()
 	{
-		while (true)
+		while (control->runtime_status())
 		{
 			visual->clear();
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
-				break;
+			model->set_control_key(control->request_key());
+			model->update_world();
 			visual->draw_objects(model->get_objects_shape());
 			visual->show();
 		}

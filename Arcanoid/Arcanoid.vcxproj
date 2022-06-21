@@ -147,6 +147,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Physics.h" />
+    <ClInclude Include="RandomGenerator.h" />
     <ClInclude Include="Visual.h" />
   </ItemGroup>
   <ItemGroup>
