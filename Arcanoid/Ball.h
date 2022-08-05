@@ -6,10 +6,12 @@ class Ball : public GameObject
 {
 public:
 	sf::CircleShape shape;
-	float radius;
+	float radius, win_w, win_h;
 
-	Ball(float x, float y, float size=10, sf::Color color=sf::Color::Red)
+	Ball(float x, float y, float w_w, float w_h, float size=10, sf::Color color=sf::Color::Red)
 	{
+		win_w = w_w;
+		win_h = w_h;
 		radius = size / 2;
 		shape.setPosition(x, y);
 		shape.setRadius(size);
@@ -44,6 +46,9 @@ public:
 
 	virtual void update() override
 	{
+		sf::Vector2f tmp_v = shape.getPosition();
+		if ((tmp_v.x - radius <= 0) || (tmp_v.x + radius >= win_w)) v.x = -v.x;
+		if ((tmp_v.y - radius <= 0) || (tmp_v.y + radius >= win_h)) v.y = -v.y;
 		shape.move(v);
 	}
 };

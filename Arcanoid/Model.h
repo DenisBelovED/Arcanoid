@@ -14,9 +14,9 @@ private:
 	{
 		float scr_cw = scr_w / 2, scr_ch = scr_h / 2;
 		float ball_size(10), block_h(20), block_w(40), panel_h(5), panel_w(70);
-		auto x = new Ball(scr_cw, scr_ch, ball_size);
-		GameObject* y = x;
-		objects.push_back(y);
+		Ball* ball = new Ball(scr_cw, scr_ch, (float)scr_w, (float)scr_h, ball_size);
+		//GameObject* y = ball;
+		objects.push_back(ball);
 	}
 public:
 	void set_control_key(int key_code)
