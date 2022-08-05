@@ -36,9 +36,9 @@ public:
 
 	virtual void init_object() override
 	{
-		RandomGenerator rx(-1.5, 1.5), ry(-2, -1);
-		v.y = ry();
-		v.x = rx();
+		RandomGenerator<float> rx(-1.5, 1.5), ry(-2, -1);
+		v.y = ry.get_float();
+		v.x = rx.get_float();
 		angle = v.y / v.x;
 	}
 

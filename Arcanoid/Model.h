@@ -21,7 +21,8 @@ private:
 public:
 	void set_control_key(int key_code)
 	{
-		std::cout << sf::Keyboard::Key(key_code) << std::endl;
+		//RandomGenerator<int> selector(0, 10);
+		//std::cout << selector.get_int() << std::endl;
 	}
 	void update_world()
 	{
