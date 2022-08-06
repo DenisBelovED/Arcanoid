@@ -52,4 +52,3 @@ public:
 		shape.move(v);
 	}
 };
-
