@@ -28,9 +28,6 @@ public:
 	void draw_objects(std::vector<GameObject*>& shapes)
 	{
 		for (GameObject* g : shapes)
-		{
-			sf::Shape& z = g->get_shape();
-			window->draw(z);
-		}
+			window->draw(g->get_shape());
 	}
 };
