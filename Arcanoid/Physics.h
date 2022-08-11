@@ -10,5 +10,7 @@ protected:
 public:
 	virtual float get_velocity() = 0;
 	virtual void set_velocity(float dr) = 0;
+	void inverse_x() { v.x = -v.x; }
+	void inverse_y() { v.y = -v.y; }
 };
 

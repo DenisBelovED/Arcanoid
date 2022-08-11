@@ -15,6 +15,9 @@ private:
 		scr_w, scr_h,
 		balls_count = 1, blocks_count = 20;
 
+	sf::Font font;
+	sf::Text game_over_text;
+
 	void generate_game()
 	{
 		float
@@ -58,24 +61,44 @@ public:
 		switch (key_code)
 		{
 		case sf::Keyboard::Key::Unknown:
-			((Platform*)objects_map[0])->stop();
+			((Platform*)objects_map[platform_id])->stop();
 			break;
 		case sf::Keyboard::Left:
-			((Platform*)objects_map[0])->move_left();
+			((Platform*)objects_map[platform_id])->move_left();
 			break;
 		case sf::Keyboard::Right:
-			((Platform*)objects_map[0])->move_right();
+			((Platform*)objects_map[platform_id])->move_right();
 			break;
 		}
 	}
-	void update_world()
+	int update_world()
 	{
-		auto pl = ((Platform*)objects_map[platform_id]);
-		auto bl = ((Ball*)objects_map[ball_id]);
-		if (bl->get_shape().getGlobalBounds().intersects(pl->get_shape().getGlobalBounds()))
-			bl->set_velocity(-100);
+		Platform* plt = ((Platform*)objects_map[platform_id]);
+		Ball* ball = ((Ball*)objects_map[ball_id]);
+
+		sf::FloatRect
+			ball_bnd = ball->get_shape().getGlobalBounds(),
+			plt_bnd = plt->get_shape().getGlobalBounds();
+
+		if (ball_bnd.intersects(plt_bnd))
+			ball->inverse_y();
+		if (ball_bnd.top >= scr_h)
+		{
+			balls_count--;
+			if (balls_count == 0) return 1; // GAME OVER CODE
+			objects_map.erase(ball_id);
+			for (auto e = objects.begin(); e != objects.end(); ++e)
+				if (*e == ball)
+				{
+					objects.erase(e);
+					break;
+				}
+			delete ball;
+			//game_over_text..draw(game_over_text);
+		}
 		for (GameObject* g : objects)
 			g->update();
+		return 0; // GAME CONTINUE CODE
 	}
 	std::vector<GameObject*>& get_objects_shape()
 	{
@@ -83,6 +106,17 @@ public:
 	}
 	Model(size_t scr_w, size_t scr_h)
 	{
+		if (font.loadFromFile("arial.ttf")) 
+		{
+			game_over_text.setFont(font);
+			game_over_text.setString("GAME OVER!");
+			game_over_text.setCharacterSize(30);
+			game_over_text.setOrigin(scr_w / 2, scr_h / 2);
+			game_over_text.setFillColor(sf::Color::Red);
+			game_over_text.setStyle(sf::Text::Bold);
+		}
+		else
+			std::cout << "FONT NOT FOUND\n";
 		Model::scr_h = scr_h;
 		Model::scr_w = scr_w;
 		generate_game();

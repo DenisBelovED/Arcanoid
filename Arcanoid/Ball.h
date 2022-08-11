@@ -44,11 +44,11 @@ public:
 		angle = v.y / v.x;
 	}
 
-	virtual void update() override
+	virtual void update(bool contact=false) override
 	{
 		sf::Vector2f tmp_v = shape.getPosition();
-		if ((tmp_v.x - radius <= 0) || (tmp_v.x + radius >= win_w)) v.x = -v.x;
-		if ((tmp_v.y - radius <= 0) || (tmp_v.y + radius >= win_h)) v.y = -v.y;
+		if ((tmp_v.x - radius <= 0) || (tmp_v.x + radius >= win_w)) inverse_x();
+		if (tmp_v.y - radius <= 0) inverse_y();
 		shape.move(v);
 	}
 };

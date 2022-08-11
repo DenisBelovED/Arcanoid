@@ -24,7 +24,7 @@ public:
     {
         return shape;
     }
-    virtual void update() override
+    virtual void update(bool contact=false) override
     {
         sf::FloatRect tmp_rect = shape.getGlobalBounds();
         if ((tmp_rect.left <= 0) && (v.x < 0)) return; 

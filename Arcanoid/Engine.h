@@ -25,11 +25,13 @@ public:
 	}
 	void game_loop()
 	{
+		int game_code = 0;
 		while (control->runtime_status())
 		{
 			visual->clear();
 			model->set_control_key(control->request_key());
-			model->update_world();
+			if (game_code != 1)
+				game_code = model->update_world();
 			visual->draw_objects(model->get_objects_shape());
 			visual->show();
 		}
