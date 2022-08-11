@@ -12,9 +12,9 @@ private:
 public:
 	Engine()
 	{
-		size_t scr_w(800), scr_h(640);
+		size_t scr_w(800), scr_h(640), blocks_count(3);
 		visual = new Visual(scr_w, scr_h);
-		model = new Model(scr_w, scr_h);
+		model = new Model(scr_w, scr_h, blocks_count);
 		control = new Control();
 	}
 	~Engine()
@@ -30,8 +30,16 @@ public:
 		{
 			visual->clear();
 			model->set_control_key(control->request_key());
-			if (game_code != 1)
+			switch (game_code)
+			{
+			default:
 				game_code = model->update_world();
+				break;
+			case 1:
+				break;
+			case 2:
+				break;
+			}
 			visual->draw_objects(model->get_objects_shape());
 			visual->show();
 		}
