@@ -35,7 +35,13 @@ public:
 		shape.setFillColor(ColorsMap[lifes]);
 	}
 
-	// Унаследовано через GameObject
+	virtual ~Block() = default;
+
+	bool is_deaf()
+	{
+		return lifes == 0;
+	}
+
 	virtual void init_object() override {};
 	virtual float get_velocity() override { return 0; };
 	virtual void set_velocity(float dr) override {};
@@ -46,7 +52,6 @@ public:
 		{
 			lifes--;
 			if (lifes > 0) shape.setFillColor(ColorsMap[lifes]);
-			if (lifes == 0) shape.~RectangleShape();
 		}
 	};
 };
