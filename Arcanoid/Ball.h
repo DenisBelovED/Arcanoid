@@ -1,5 +1,4 @@
 #pragma once
-#include "GameObject.h"
 #include "RandomGenerator.h"
 
 class Ball : public GameObject

@@ -1,8 +1,4 @@
 #pragma once
-#include <vector>
-#include "Ball.h"
-#include "Platform.h"
-#include "Block.h"
 
 class MapObjects
 {

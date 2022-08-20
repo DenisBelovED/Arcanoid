@@ -4,7 +4,6 @@
 #include "Ball.h"
 #include "Platform.h"
 #include "Block.h"
-#include <iostream>
 #include "MapObjects.h"
 
 class Model

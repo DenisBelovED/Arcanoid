@@ -41,14 +41,14 @@ public:
 			case 1:
 				visual->draw_objects(model->get_fail_shape());
 				visual->show();
-				while (sf::Keyboard::Key::Space != control->request_key()) continue;
+				while ((sf::Keyboard::Key::Space != control->request_key()) && control->runtime_status()) continue;
 				delete model;
 				model = new Model(scr_w, scr_h, blocks_count);
 				break;
 			case 2:
 				visual->draw_objects(model->get_vin_shape());
 				visual->show();
-				while (sf::Keyboard::Key::Space != control->request_key()) continue;
+				while (sf::Keyboard::Key::Space != control->request_key() && control->runtime_status()) continue;
 				delete model;
 				model = new Model(scr_w, scr_h, blocks_count);
 				break;
