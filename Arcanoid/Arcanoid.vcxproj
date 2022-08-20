@@ -146,6 +146,7 @@
     <ClInclude Include="Control.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="MapObjects.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Platform.h" />

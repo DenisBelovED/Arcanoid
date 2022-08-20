@@ -5,175 +5,107 @@
 #include "Platform.h"
 #include "Block.h"
 #include <iostream>
-#include <map>
+#include "MapObjects.h"
 
 class Model
 {
 private:
-	sf::Texture game_over_texture, game_vin_texture;
-	Block *game_over_block, *game_vin_block;
-	RandomGenerator<int>* rand_life_ptr = new RandomGenerator<int>(1, 2);
+	MapObjects* game_map;
+	std::vector<GameObject*> rendering_objects;
+	size_t scr_w, scr_h;
 
-	std::map<int, GameObject*> objects_map; // 0 - platform, 10-99 - ball id, 100-999 - block id
-	size_t scr_w, scr_h, blocks_count, balls_count = 1;
-
-	void generate_game()
+	void generate_game(size_t blocks_count)
 	{
-		float
-			scr_cw(scr_w / 2), scr_ch(scr_h / 2),
-			platform_w(scr_w / 4), platform_h(scr_h / 30), velocity(5),
-			ball_size(10), block_h(20), block_w(40), panel_h(5), panel_w(70);
-		auto game_over_texture_size = game_over_texture.getSize();
-		auto game_vin_texture_size = game_vin_texture.getSize();
-		
-		game_over_block = new Block(
-			scr_cw - game_over_texture_size.x / 2,
-			scr_ch - game_over_texture_size.y / 2,
-			(size_t)10,
-			game_over_texture_size.x,
-			game_over_texture_size.y,
-			&game_over_texture
-		);
-
-		game_vin_block = new Block(
-			scr_cw - game_vin_texture_size.x / 2,
-			scr_ch - game_vin_texture_size.y / 2,
-			(size_t)10,
-			game_vin_texture_size.x,
-			game_vin_texture_size.y,
-			&game_vin_texture
-		);
-
-		Ball* ball = new Ball(
-			scr_cw, 
-			scr_ch, 
-			(float)scr_w,
-			(float)scr_h, 
-			ball_size
-		);
-		objects_map[ball_id] = ball;
-
-		Platform* platform = new Platform(
-			(size_t)platform_w,
-			(size_t)platform_h,
-			(scr_w - platform_w) / 2,
-			scr_h - ball_size * 2,
-			(float)scr_w, 
-			(float)scr_h,
-			velocity
-		);
-		objects_map[platform_id] = platform;
-
-		for (int i = 1; i <= blocks_count; i++)
-		{
-			Block* b_tmp = new Block(
-				scr_cw / 4 + 100 * i,
-				scr_ch / 4 + 100 * i,
-				(size_t)(rand_life_ptr->get_int()),
-				50,
-				30
-			);
-			objects_map[block_id + i - 1] = b_tmp;
-		}
+		game_map = new MapObjects(scr_w, scr_h, blocks_count);
 	}
 public:
-	enum obj_id
-	{
-		platform_id = 0,
-		ball_id = 10,
-		block_id = 100,
-		game_vin_id = 1000,
-		game_over_id = 1001
-	};
 	void set_control_key(int key_code)
 	{
 		switch (key_code)
 		{
 		case sf::Keyboard::Key::Unknown:
-			((Platform*)objects_map[platform_id])->stop();
+			game_map->platform->stop();
 			break;
 		case sf::Keyboard::Left:
-			((Platform*)objects_map[platform_id])->move_left();
+			game_map->platform->move_left();
 			break;
 		case sf::Keyboard::Right:
-			((Platform*)objects_map[platform_id])->move_right();
+			game_map->platform->move_right();
 			break;
 		}
 	}
 	int update_world()
 	{
-		Platform* plt = ((Platform*)objects_map[platform_id]);
-		Ball* ball = ((Ball*)objects_map[ball_id]);
-
 		sf::FloatRect
 			block_bnd,
-			ball_bnd = ball->get_shape().getGlobalBounds(),
-			plt_bnd = plt->get_shape().getGlobalBounds();
-
-		if (ball_bnd.intersects(plt_bnd))
+			ball_bnd,
+			plt_bnd = game_map->platform->get_shape().getGlobalBounds();
+		
+		std::vector<Ball*>::iterator fix_ball_it = game_map->balls.begin();
+		for (int ball_it = 0; ball_it < game_map->balls.size(); ball_it++)
 		{
-			ball->inverse_y();
-			// TODO
-		}
-
-		int blocks_count_tmp = blocks_count;
-		std::cout << blocks_count_tmp << std::endl;
-
-		for (int i = 0; i < blocks_count_tmp; i++)
-		{
-			if (objects_map.find(block_id + i) == objects_map.end())
-				continue;
-			block_bnd = objects_map[block_id + i]->get_shape().getGlobalBounds();
-			if (ball_bnd.intersects(block_bnd))
+			ball_bnd = game_map->balls[ball_it]->get_shape().getGlobalBounds();
+			if (ball_bnd.intersects(plt_bnd))
 			{
-				std::cout << "intrsct" << std::endl;
-
-				Block* block_ptr = ((Block*)objects_map[block_id + i]);
-				block_ptr->update(true);
-				if (block_ptr->is_deaf())
+				game_map->balls[ball_it]->inverse_y();
+				// TODO
+			}
+			std::vector<Block*>::iterator fix_block_it = game_map->blocks.begin();
+			for (int block_it = 0; block_it < game_map->blocks.size(); block_it++)
+			{
+				block_bnd = game_map->blocks[block_it]->get_shape().getGlobalBounds();
+				if (ball_bnd.intersects(block_bnd))
 				{
-					delete block_ptr;
-					objects_map.erase(block_id + i);
-					blocks_count--;
+					game_map->blocks[block_it]->update(true);
+					if (game_map->blocks[block_it]->is_deaf())
+					{
+						delete game_map->blocks[block_it];
+						game_map->blocks.erase(fix_block_it + block_it);
+					}
+					game_map->balls[ball_it]->inverse_y(); // TODO full cases
 				}
-				ball->inverse_y(); // TODO full cases
 			}
-		}
-		if (blocks_count == 0)
-		{
-			objects_map[game_vin_id] = game_vin_block;
-			return 2; // VICTORY CODE
-		}
-
-		if (ball_bnd.top >= scr_h)
-		{
-			balls_count--;
-			if (balls_count == 0)
+			if (ball_bnd.top >= scr_h)
 			{
-				objects_map[game_over_id] = game_over_block;
-				return 1; // MISSION FAIL CODE
+				game_map->balls.erase(fix_ball_it + ball_it);
+				if (game_map->balls.empty())
+					return 1; // MISSION FAIL CODE
+				delete game_map->balls[ball_it];
 			}
-			objects_map.erase(ball_id + balls_count - 1);
-			delete ball;
+			game_map->balls[ball_it]->update();
 		}
-		for (std::map<int, GameObject*>::iterator it = objects_map.begin(); it != objects_map.end(); ++it)
-			it->second->update();
+		game_map->platform->update();
+
+		if (game_map->blocks.empty())
+			return 2; // VICTORY CODE
 		return 0; // GAME CONTINUE CODE
 	}
-	std::map<int, GameObject*>& get_objects_shape()
+	std::vector<GameObject*>& get_objects_shape()
 	{
-		return objects_map;
+		rendering_objects.clear();
+		rendering_objects.push_back(game_map->platform);
+		for (Ball* b : game_map->balls)
+			rendering_objects.push_back(b);
+		for (Block* b : game_map->blocks)
+			rendering_objects.push_back(b);
+		return rendering_objects;
+	}
+	std::vector<GameObject*>& get_vin_shape()
+	{
+		rendering_objects.clear();
+		rendering_objects.push_back(game_map->game_vin_block);
+		return rendering_objects;
+	}
+	std::vector<GameObject*>& get_fail_shape()
+	{
+		rendering_objects.clear();
+		rendering_objects.push_back(game_map->game_over_block);
+		return rendering_objects;
 	}
 	Model(size_t scr_w, size_t scr_h, size_t blocks_count)
 	{
-		if (!game_over_texture.loadFromFile("C:/Users/Denis/Documents/Политех/C++/Arcanoid/Arcanoid/data/game_over.png"))
-			std::cout << "TEXTURE data/game_over.png NOT FOUND";
-		if (!game_vin_texture.loadFromFile("C:/Users/Denis/Documents/Политех/C++/Arcanoid/Arcanoid/data/game_vin.png"))
-			std::cout << "TEXTURE data/game_vin.png NOT FOUND";
 		Model::scr_h = scr_h;
 		Model::scr_w = scr_w;
-		Model::blocks_count = blocks_count;
-		generate_game();
+		generate_game(blocks_count);
 	}
 };
-

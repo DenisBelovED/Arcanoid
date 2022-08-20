@@ -56,9 +56,13 @@ public:
 		if ((tmp_v.x - radius <= 0) || (tmp_v.x + radius >= win_w))
 		{
 			inverse_x();
-			v.x += stochastic_move->get_float();
+			v.y += stochastic_move->get_float();
 		}
-		if (tmp_v.y - radius <= 0) inverse_y();
+		if (tmp_v.y - radius <= 0)
+		{
+			v.x += stochastic_move->get_float();
+			inverse_y();
+		}
 		shape.move(v);
 	}
 };

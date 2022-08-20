@@ -26,9 +26,9 @@ public:
 	{
 		window->display();
 	}
-	void draw_objects(std::map<int, GameObject*>& objects_map)
+	void draw_objects(std::vector<GameObject*>& objects_map)
 	{
-		for (std::map<int, GameObject*>::iterator it = objects_map.begin(); it != objects_map.end(); ++it)
-			window->draw(it->second->get_shape());
+		for (GameObject* e : objects_map)
+			window->draw(e->get_shape());
 	}
 };
