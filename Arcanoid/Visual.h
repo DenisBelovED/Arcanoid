@@ -1,8 +1,4 @@
 #pragma once
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
-#include <map>
-#include "GameObject.h"
 
 class Visual
 {
