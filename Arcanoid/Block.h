@@ -26,12 +26,11 @@ public:
 	{
 		shape.setPosition(x, y);
 		shape.setSize(sf::Vector2f(w, h));
-		if (texture != nullptr)
-		{
-			shape.setTexture(texture);
-		}
 		Block::lifes = lifes;
-		shape.setFillColor(ColorsMap[lifes]);
+		if (texture != nullptr)
+			shape.setTexture(texture);
+		else
+			shape.setFillColor(ColorsMap[lifes]);
 	}
 
 	virtual ~Block() = default;
