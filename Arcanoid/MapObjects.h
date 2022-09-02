@@ -17,9 +17,9 @@ public:
 			platform_w(win_w / 4), platform_h(win_h / 30), velocity(5),
 			ball_size(10), block_h(20), block_w(40), panel_h(5), panel_w(70);
 
-		if (!game_over_texture.loadFromFile("C:/Users/Denis/Documents/Политех/C++/Arcanoid/Arcanoid/data/game_over.png")) // TODO
+		if (!game_over_texture.loadFromFile("data/game_over.png"))
 			std::cout << "TEXTURE data/game_over.png NOT FOUND";
-		if (!game_vin_texture.loadFromFile("C:/Users/Denis/Documents/Политех/C++/Arcanoid/Arcanoid/data/game_vin.png")) // TODO
+		if (!game_vin_texture.loadFromFile("data/game_vin.png"))
 			std::cout << "TEXTURE data/game_vin.png NOT FOUND";
 
 		auto game_over_texture_size = game_over_texture.getSize();

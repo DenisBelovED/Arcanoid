@@ -64,4 +64,9 @@ public:
 		}
 		shape.move(v);
 	}
+
+	float scalar_mul(float x, float y)
+	{
+		return v.x * x + v.y * y;
+	}
 };

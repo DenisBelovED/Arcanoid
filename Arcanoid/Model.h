@@ -43,11 +43,18 @@ public:
 		std::vector<Ball*>::iterator fix_ball_it = game_map->balls.begin();
 		for (int ball_it = 0; ball_it < game_map->balls.size(); ball_it++)
 		{
-			ball_bnd = game_map->balls[ball_it]->get_shape().getGlobalBounds();
+			Ball* ball_obj = game_map->balls[ball_it];
+			ball_bnd = ball_obj->get_shape().getGlobalBounds();
 			if (ball_bnd.intersects(plt_bnd))
 			{
-				game_map->balls[ball_it]->inverse_y();
-				// TODO
+				if (
+					(plt_bnd.left - ball_obj->radius < ball_bnd.left) && 
+					(plt_bnd.left + plt_bnd.width < ball_bnd.left + ball_bnd.width + ball_obj->radius) &&
+					(ball_obj->scalar_mul(0, -1) <= 0)
+					)
+					ball_obj->inverse_y();
+				else
+					ball_obj->inverse_x();
 			}
 			std::vector<Block*>::iterator fix_block_it = game_map->blocks.begin();
 			for (int block_it = 0; block_it < game_map->blocks.size(); block_it++)
@@ -61,7 +68,7 @@ public:
 						delete game_map->blocks[block_it];
 						game_map->blocks.erase(fix_block_it + block_it);
 					}
-					game_map->balls[ball_it]->inverse_y(); // TODO full cases
+					ball_obj->inverse_y(); // TODO full cases
 				}
 			}
 			if (ball_bnd.top >= scr_h)
@@ -69,9 +76,9 @@ public:
 				game_map->balls.erase(fix_ball_it + ball_it);
 				if (game_map->balls.empty())
 					return 1; // MISSION FAIL CODE
-				delete game_map->balls[ball_it];
+				delete ball_obj;
 			}
-			game_map->balls[ball_it]->update();
+			ball_obj->update();
 		}
 		game_map->platform->update();
 
