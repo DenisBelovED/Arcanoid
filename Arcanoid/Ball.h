@@ -67,6 +67,7 @@ public:
 
 	float scalar_mul(float x, float y)
 	{
+		std::cout << v.x << " " << v.y << std::endl;
 		return v.x * x + v.y * y;
 	}
 };

@@ -12,6 +12,7 @@ private:
 	MapObjects* game_map;
 	std::vector<GameObject*> rendering_objects;
 	size_t scr_w, scr_h;
+	float near_radius = 0, x_centroid = 0, y_centroid = 0;
 
 	void generate_game(size_t blocks_count)
 	{
@@ -44,12 +45,16 @@ public:
 		for (int ball_it = 0; ball_it < game_map->balls.size(); ball_it++)
 		{
 			Ball* ball_obj = game_map->balls[ball_it];
+			near_radius = ball_obj->radius * sqrt(2) * 0.5;
 			ball_bnd = ball_obj->get_shape().getGlobalBounds();
+			x_centroid = ball_bnd.left + ball_bnd.width * 0.5;
+			y_centroid = ball_bnd.top + ball_bnd.height * 0.5;
 			if (ball_bnd.intersects(plt_bnd))
 			{
 				if (
-					(plt_bnd.left - ball_obj->radius < ball_bnd.left) && 
-					(plt_bnd.left + plt_bnd.width < ball_bnd.left + ball_bnd.width + ball_obj->radius) &&
+					(plt_bnd.left - near_radius < x_centroid) &&
+					(x_centroid < plt_bnd.left + plt_bnd.width + near_radius) &&
+					(plt_bnd.top - near_radius > y_centroid) &&
 					(ball_obj->scalar_mul(0, -1) <= 0)
 					)
 					ball_obj->inverse_y();
@@ -63,12 +68,22 @@ public:
 				if (ball_bnd.intersects(block_bnd))
 				{
 					game_map->blocks[block_it]->update(true);
+
+					if (
+						(x_centroid <= block_bnd.left - near_radius) || 
+						(block_bnd.left + block_bnd.width + near_radius <= x_centroid)
+						) ball_obj->inverse_x();
+
+					if (
+						(y_centroid <= block_bnd.top - near_radius) ||
+						(block_bnd.top + block_bnd.height + near_radius <= y_centroid)
+						) ball_obj->inverse_y();
+
 					if (game_map->blocks[block_it]->is_deaf())
 					{
 						delete game_map->blocks[block_it];
 						game_map->blocks.erase(fix_block_it + block_it);
 					}
-					ball_obj->inverse_y(); // TODO full cases
 				}
 			}
 			if (ball_bnd.top >= scr_h)
