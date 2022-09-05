@@ -11,12 +11,16 @@ class Model
 private:
 	MapObjects* game_map;
 	std::vector<GameObject*> rendering_objects;
-	size_t scr_w, scr_h;
+	size_t scr_w, scr_h, const_block_count = 0;
 	float near_radius = 0, x_centroid = 0, y_centroid = 0;
+	RandomGenerator<float>* rand_bonus_ptr = new RandomGenerator<float>(0, 1);
 
 	void generate_game(size_t blocks_count)
 	{
 		game_map = new MapObjects(scr_w, scr_h, blocks_count);
+		for (Block* b : game_map->blocks)
+			if (b->is_const())
+				const_block_count++;
 	}
 public:
 	void set_control_key(int key_code)
@@ -39,9 +43,12 @@ public:
 		sf::FloatRect
 			block_bnd,
 			ball_bnd,
+			bonus_bnd,
 			plt_bnd = game_map->platform->get_shape().getGlobalBounds();
 		
 		std::vector<Ball*>::iterator fix_ball_it = game_map->balls.begin();
+		std::vector<Block*>::iterator bonus_it = game_map->bonuses.begin();
+
 		for (int ball_it = 0; ball_it < game_map->balls.size(); ball_it++)
 		{
 			Ball* ball_obj = game_map->balls[ball_it];
@@ -81,6 +88,23 @@ public:
 
 					if (game_map->blocks[block_it]->is_deaf())
 					{
+						float p = rand_bonus_ptr->get_float();
+						if ((0.0 <= p) && (p < 0.85))
+							game_map->bonuses.push_back(
+								new Block(block_bnd.left + block_bnd.width * 0.5, block_bnd.top + block_bnd.height * 0.5, 11, 10, 10, nullptr, 2)
+							);
+						if ((0.85 <= p) && (p < 0.9))
+							game_map->bonuses.push_back(
+								new Block(block_bnd.left + block_bnd.width * 0.5, block_bnd.top + block_bnd.height * 0.5, 1, 10, 10, nullptr, 1)
+							);
+						if ((0.9 <= p) && (p < 0.95))
+							game_map->bonuses.push_back(
+								new Block(block_bnd.left + block_bnd.width * 0.5, block_bnd.top + block_bnd.height * 0.5, 3, 10, 10, nullptr, 2)
+							);
+						if ((0.95 <= p) && (p <= 1))
+							game_map->bonuses.push_back(
+								new Block(block_bnd.left + block_bnd.width * 0.5, block_bnd.top + block_bnd.height * 0.5, 5, 10, 10, nullptr, 3)
+							);
 						delete game_map->blocks[block_it];
 						game_map->blocks.erase(fix_block_it + block_it);
 					}
@@ -95,9 +119,38 @@ public:
 			}
 			ball_obj->update();
 		}
+		for (int bonus_id = 0; bonus_id < game_map->bonuses.size(); bonus_id++)
+		{
+			game_map->bonuses[bonus_id]->update();
+			bonus_bnd = game_map->bonuses[bonus_id]->get_shape().getGlobalBounds();
+			if (bonus_bnd.intersects(plt_bnd))
+			{
+				switch (game_map->bonuses[bonus_id]->get_bonus())
+				{
+				case 0:
+					break;
+				case 1:
+					for (Ball* b: game_map->balls)
+						b->set_velocity(rand_bonus_ptr->get_float() + 0.7);
+					break;
+				case 2:
+					game_map->platform->get_shape().scale((rand_bonus_ptr->get_float() + 0.5), 1);
+					break;
+				case 3:
+					break;
+				}
+				delete game_map->bonuses[bonus_id];
+				game_map->bonuses.erase(bonus_it + bonus_id);
+			}
+			if (bonus_bnd.top > scr_h)
+			{
+				delete game_map->bonuses[bonus_id];
+				game_map->bonuses.erase(bonus_it + bonus_id);
+			}
+		}
 		game_map->platform->update();
 
-		if (game_map->blocks.empty())
+		if (game_map->blocks.size() - const_block_count == 0)
 			return 2; // VICTORY CODE
 		return 0; // GAME CONTINUE CODE
 	}
@@ -108,6 +161,8 @@ public:
 		for (Ball* b : game_map->balls)
 			rendering_objects.push_back(b);
 		for (Block* b : game_map->blocks)
+			rendering_objects.push_back(b);
+		for (Block* b : game_map->bonuses)
 			rendering_objects.push_back(b);
 		return rendering_objects;
 	}
@@ -128,5 +183,12 @@ public:
 		Model::scr_h = scr_h;
 		Model::scr_w = scr_w;
 		generate_game(blocks_count);
+	}
+	~Model()
+	{
+		delete game_map, rand_bonus_ptr;
+		//for (int i = 0; i < rendering_objects.size(); i++)
+		//	delete rendering_objects[i];
+		rendering_objects.clear();
 	}
 };

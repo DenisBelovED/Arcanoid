@@ -5,13 +5,13 @@ class MapObjects
 public:
 	sf::Texture game_over_texture, game_vin_texture;
 	std::vector<Ball*> balls;
-	std::vector<Block*> blocks;
+	std::vector<Block*> blocks, bonuses;
 	Block *game_over_block, *game_vin_block;
 	Platform *platform;
 
 	MapObjects(size_t win_w, size_t win_h, size_t block_count)
 	{
-		RandomGenerator<int>* rand_life_ptr = new RandomGenerator<int>(1, 2);
+		RandomGenerator<int>* rand_life_ptr = new RandomGenerator<int>(1, 12);
 		float
 			scr_cw(win_w / 2), scr_ch(win_h / 2),
 			platform_w(win_w / 4), platform_h(win_h / 30), velocity(5),
@@ -46,19 +46,22 @@ public:
 		platform = new Platform(
 			(size_t)platform_w,
 			(size_t)platform_h,
-			(win_w - platform_w) / 2,
+			scr_cw,
 			win_h - ball_size * 2,
 			(float)win_w,
 			(float)win_h,
 			velocity
 		);
 
-		Ball* b = new Ball(scr_cw, scr_ch, (float)win_w, (float)win_h, ball_size);
+		Ball* b = new Ball(scr_cw, win_h - ball_size * 3, (float)win_w, (float)win_h, ball_size);
 		balls.push_back(b);
 
+		int str, col;
 		for (int i = 0; i < block_count; i++)
 		{
-			Block* b = new Block(scr_cw / 4 + 100 * i, scr_ch / 4 + 100 * i, (size_t)(rand_life_ptr->get_int()), 50, 30);
+			str = i / 5;
+			col = i % 5;
+			Block* b = new Block(col * scr_cw / 3 + 80, str * scr_ch / 4 + 50, (size_t)(rand_life_ptr->get_int()), 100, 40);
 			blocks.push_back(b);
 		}
 	}
@@ -68,6 +71,8 @@ public:
 			delete balls[i];
 		for (int i = 0; i < blocks.size(); i++)
 			delete blocks[i];
+		for (int i = 0; i < bonuses.size(); i++)
+			delete bonuses[i];
 		delete game_over_block, game_vin_block, platform;
 	}
 };

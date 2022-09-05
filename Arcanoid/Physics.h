@@ -4,7 +4,6 @@ class Physics
 {
 protected:
 	sf::Vector2f v{0, 0};
-	float angle = 0;
 	virtual void init_object() = 0;
 
 public:

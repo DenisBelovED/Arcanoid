@@ -32,13 +32,13 @@ public:
 
 	virtual float get_velocity()
 	{
-		return 0;
+		return sqrt(v.x * v.x + v.y * v.y);
 	}
 
 	virtual void set_velocity(float dr) override
 	{
-		v.x = dr * cos(angle);
-		v.y = dr * sin(angle);
+		v.x *= dr;
+		v.y *= dr;
 	}
 
 	virtual void init_object() override
@@ -46,7 +46,6 @@ public:
 		RandomGenerator<float> rx(-3, 3), ry(-4, -3);
 		v.y = ry.get_float();
 		v.x = rx.get_float();
-		angle = v.y / v.x;
 	}
 
 	virtual void update(bool contact=false) override
@@ -67,7 +66,6 @@ public:
 
 	float scalar_mul(float x, float y)
 	{
-		std::cout << v.x << " " << v.y << std::endl;
 		return v.x * x + v.y * y;
 	}
 };
