@@ -13,8 +13,6 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
-SFML/
-
 # Mono auto generated files
 mono_crash.*
 
@@ -363,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/SFML/doc/html
+/SFML/examples
+
