@@ -64,6 +64,18 @@ public:
 		shape.move(v);
 	}
 
+	void rotate(float alpha)
+	{
+		v.x = cos(alpha) * v.x - sin(alpha) * v.y;
+		v.y = sin(alpha) * v.x + cos(alpha) * v.y;
+	}
+	
+	void add(float x, float y)
+	{
+		v.x += x;
+		v.y += y;
+	}
+
 	float scalar_mul(float x, float y)
 	{
 		return v.x * x + v.y * y;

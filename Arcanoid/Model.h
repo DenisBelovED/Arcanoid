@@ -11,8 +11,9 @@ class Model
 private:
 	MapObjects* game_map;
 	std::vector<GameObject*> rendering_objects;
-	size_t scr_w, scr_h, const_block_count = 0;
-	float near_radius = 0, x_centroid = 0, y_centroid = 0;
+	size_t scr_w, scr_h, const_block_count;
+	float near_radius, x_centroid, y_centroid, br_x_centroid, br_y_centroid,
+		vx, vy, alpha;
 	RandomGenerator<float>* rand_bonus_ptr = new RandomGenerator<float>(0, 1);
 
 	void generate_game(size_t blocks_count)
@@ -43,15 +44,17 @@ public:
 		sf::FloatRect
 			block_bnd,
 			ball_bnd,
+			br_ball_bnd,
 			bonus_bnd,
 			plt_bnd = game_map->platform->get_shape().getGlobalBounds();
+		Ball *ball_obj, *br_ball_obj;
 		
 		std::vector<Ball*>::iterator fix_ball_it = game_map->balls.begin();
 		std::vector<Block*>::iterator bonus_it = game_map->bonuses.begin();
 
 		for (int ball_it = 0; ball_it < game_map->balls.size(); ball_it++)
 		{
-			Ball* ball_obj = game_map->balls[ball_it];
+			ball_obj = game_map->balls[ball_it];
 			near_radius = ball_obj->radius * sqrt(2) * 0.5;
 			ball_bnd = ball_obj->get_shape().getGlobalBounds();
 			x_centroid = ball_bnd.left + ball_bnd.width * 0.5;
@@ -68,6 +71,28 @@ public:
 				else
 					ball_obj->inverse_x();
 			}
+
+			for (int br_ball_it = 0; br_ball_it < game_map->balls.size(); br_ball_it++)
+				if (ball_it != br_ball_it)
+				{
+					br_ball_obj = game_map->balls[br_ball_it];
+					br_ball_bnd = br_ball_obj->get_shape().getGlobalBounds();
+					br_x_centroid = br_ball_bnd.left + br_ball_bnd.width * 0.5;
+					br_y_centroid = br_ball_bnd.top + br_ball_bnd.height * 0.5;
+					//float distance = sqrt(pow(x_centroid - br_x_centroid, 2) + pow(y_centroid - br_y_centroid, 2));
+					if (ball_bnd.intersects(br_ball_bnd)) // && (distance >= (ball_obj->radius * 2 + 1e-1)))
+					{
+						vx = br_x_centroid - x_centroid;
+						vy = br_y_centroid - y_centroid;
+						alpha = ball_obj->scalar_mul(vx, vy) / (ball_obj->get_velocity() * sqrt(vx * vx + vy * vy));
+						ball_obj->rotate(alpha);
+						vx = x_centroid - br_x_centroid;
+						vy = y_centroid - br_y_centroid;
+						alpha = br_ball_obj->scalar_mul(vx, vy) / (br_ball_obj->get_velocity() * sqrt(vx * vx + vy * vy));
+						br_ball_obj->rotate(alpha);
+					}
+				}
+
 			std::vector<Block*>::iterator fix_block_it = game_map->blocks.begin();
 			for (int block_it = 0; block_it < game_map->blocks.size(); block_it++)
 			{
@@ -89,27 +114,26 @@ public:
 					if (game_map->blocks[block_it]->is_deaf())
 					{
 						float p = rand_bonus_ptr->get_float();
-						if ((0.0 <= p) && (p < 0.85))
+						if ((0.4 <= p) && (p < 0.6))
 							game_map->bonuses.push_back(
-								new Block(block_bnd.left + block_bnd.width * 0.5, block_bnd.top + block_bnd.height * 0.5, 11, 10, 10, nullptr, 2)
+								new Block(block_bnd.left + block_bnd.width * 0.5, block_bnd.top + block_bnd.height * 0.5, 5, 10, 10, nullptr, 1)
 							);
-						if ((0.85 <= p) && (p < 0.9))
-							game_map->bonuses.push_back(
-								new Block(block_bnd.left + block_bnd.width * 0.5, block_bnd.top + block_bnd.height * 0.5, 1, 10, 10, nullptr, 1)
-							);
-						if ((0.9 <= p) && (p < 0.95))
+						if ((0.6 <= p) && (p < 0.8))
 							game_map->bonuses.push_back(
 								new Block(block_bnd.left + block_bnd.width * 0.5, block_bnd.top + block_bnd.height * 0.5, 3, 10, 10, nullptr, 2)
 							);
-						if ((0.95 <= p) && (p <= 1))
+						if ((0.8 <= p) && (p <= 1))
 							game_map->bonuses.push_back(
-								new Block(block_bnd.left + block_bnd.width * 0.5, block_bnd.top + block_bnd.height * 0.5, 5, 10, 10, nullptr, 3)
+								new Block(block_bnd.left + block_bnd.width * 0.5, block_bnd.top + block_bnd.height * 0.5, 1, 10, 10, nullptr, 3)
 							);
 						delete game_map->blocks[block_it];
 						game_map->blocks.erase(fix_block_it + block_it);
 					}
 				}
 			}
+
+			ball_obj->update();
+			
 			if (ball_bnd.top >= scr_h)
 			{
 				game_map->balls.erase(fix_ball_it + ball_it);
@@ -117,7 +141,6 @@ public:
 					return 1; // MISSION FAIL CODE
 				delete ball_obj;
 			}
-			ball_obj->update();
 		}
 		for (int bonus_id = 0; bonus_id < game_map->bonuses.size(); bonus_id++)
 		{
@@ -137,6 +160,9 @@ public:
 					game_map->platform->get_shape().scale((rand_bonus_ptr->get_float() + 0.5), 1);
 					break;
 				case 3:
+					game_map->balls.push_back(
+						new Ball(plt_bnd.left + plt_bnd.width * 0.5, scr_h - game_map->balls[0]->radius * 6, (float)scr_w, (float)scr_h, game_map->balls[0]->radius * 2)
+					);
 					break;
 				}
 				delete game_map->bonuses[bonus_id];

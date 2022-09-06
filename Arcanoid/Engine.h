@@ -10,7 +10,7 @@ private:
 	Model* model;
 	Control* control;
 public:
-	size_t scr_w = 800, scr_h = 640, blocks_count = 10;
+	size_t scr_w = 800, scr_h = 640, blocks_count = 15;
 
 	Engine()
 	{

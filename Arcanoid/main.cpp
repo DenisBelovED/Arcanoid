@@ -1,6 +1,6 @@
 #include "Engine.h"
 
-int main()
+int WinMain()
 {
 	Engine game;
 	game.game_loop();
